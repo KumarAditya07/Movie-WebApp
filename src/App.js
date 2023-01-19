@@ -1,87 +1,93 @@
 import React,{useState} from 'react';
 import MovieList from './components/MovieList';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import { useEffect } from 'react';
+import MovieListHeading from './components/MovieListHeading';
+import SearchBox from './components/SearchBox.jsx';
+import AddFavourite from './components/AddFavourite';
+import RemoveFavourites from './components/RemoveFavourites.Jsx';
+
 
 const App=()=> {
-  const [movies,setMovie] = useState([
-    {
-            "Title": "Batman Begins",
-            "Year": "2005",
-            "imdbID": "tt0372784",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BOTY4YjI2N2MtYmFlMC00ZjcyLTg3YjEtMDQyM2ZjYzQ5YWFkXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman v Superman: Dawn of Justice",
-            "Year": "2016",
-            "imdbID": "tt2975590",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BYThjYzcyYzItNTVjNy00NDk0LTgwMWQtYjMwNmNlNWJhMzMyXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg"
-        },
-        {
-            "Title": "The Batman",
-            "Year": "2022",
-            "imdbID": "tt1877830",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BMDdmMTBiNTYtMDIzNi00NGVlLWIzMDYtZTk3MTQ3NGQxZGEwXkEyXkFqcGdeQXVyMzMwOTU5MDk@._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman",
-            "Year": "1989",
-            "imdbID": "tt0096895",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BZDNjOGNhN2UtNmNhMC00YjU4LWEzMmUtNzRkM2RjN2RiMjc5XkEyXkFqcGdeQXVyMTU0OTM5ODc1._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman Returns",
-            "Year": "1992",
-            "imdbID": "tt0103776",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BOGZmYzVkMmItM2NiOS00MDI3LWI4ZWQtMTg0YWZkODRkMmViXkEyXkFqcGdeQXVyODY0NzcxNw@@._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman & Robin",
-            "Year": "1997",
-            "imdbID": "tt0118688",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BMGQ5YTM1NmMtYmIxYy00N2VmLWJhZTYtN2EwYTY3MWFhOTczXkEyXkFqcGdeQXVyNTA2NTI0MTY@._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman Forever",
-            "Year": "1995",
-            "imdbID": "tt0112462",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BNDdjYmFiYWEtYzBhZS00YTZkLWFlODgtY2I5MDE0NzZmMDljXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg"
-        },
-        {
-            "Title": "The Lego Batman Movie",
-            "Year": "2017",
-            "imdbID": "tt4116284",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BMTcyNTEyOTY0M15BMl5BanBnXkFtZTgwOTAyNzU3MDI@._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman: The Animated Series",
-            "Year": "1992–1995",
-            "imdbID": "tt0103359",
-            "Type": "series",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BOTM3MTRkZjQtYjBkMy00YWE1LTkxOTQtNDQyNGY0YjYzNzAzXkEyXkFqcGdeQXVyOTgwMzk1MTA@._V1_SX300.jpg"
-        },
-        {
-            "Title": "Batman v Superman: Dawn of Justice (Ultimate Edition)",
-            "Year": "2016",
-            "imdbID": "tt18689424",
-            "Type": "movie",
-            "Poster": "https://m.media-amazon.com/images/M/MV5BN2I4OTllM2MtMWVhNC00MjkzLWJlMDUtN2FhMGQ2ZGVjMjllXkEyXkFqcGdeQXVyMTEyNzgwMDUw._V1_SX300.jpg"
-        }
-  ]);
+  const [movies,setMovie] = useState([]);
+  const [favourites, setFavourites] = useState([]);
+  const [searchValue, setSearchValue] = useState('');
 
+
+  //using fetch we are geting http response for data and converting it into JSon s
+ const getMovieRequest=async  (searchValue)=>{
+    const url = `https://www.omdbapi.com/?apikey=727bbdc1&s=${searchValue}`
+
+    const response = await fetch(url);
+    const responseJson  = await response.json();
+   if(responseJson.Search){
+    setMovie(responseJson.Search);
+   }
+ }
+
+
+ useEffect(() => {
+    getMovieRequest(searchValue);
+}, [searchValue]);
+
+useEffect(() => {
+  const movieFavourites = JSON.parse(
+    localStorage.getItem('react-movie-app-favourites')
+  );
+
+  if (movieFavourites) {
+    setFavourites(movieFavourites);
+  }
+}, []);
+
+
+const saveToLocalStorage = (items) => {
+		localStorage.setItem('react-movie-app-favourites', JSON.stringify(items));
+	};
+
+	const addFavouriteMovie = (movie) => {
+		const newFavouriteList = [...favourites, movie];
+		setFavourites(newFavouriteList);
+		saveToLocalStorage(newFavouriteList);
+	};
+
+  const removeFavouriteMovie = (movie) => {
+		const newFavouriteList = favourites.filter(
+			(favourite) => favourite.imdbID !== movie.imdbID
+		);
+
+		setFavourites(newFavouriteList);
+		saveToLocalStorage(newFavouriteList);
+	};
 
   
 
   return (
-    <div className="App">
-      <MovieList movies={movies}/>
-    </div>
+   
+		<div className='container-fluid movie-app'>
+			<div className='row d-flex align-items-center mt-4 mb-4'>
+				<MovieListHeading heading='Movies' />
+				<SearchBox searchValue={searchValue} setSearchValue={setSearchValue} />
+			</div>
+			<div className='row'>
+				<MovieList
+					movies={movies}
+					handleFavouritesClick={addFavouriteMovie}
+					favouriteComponent={AddFavourite}
+				/>
+			</div>
+			<div className='row d-flex align-items-center mt-4 mb-4'>
+				<MovieListHeading heading='Favourites' />
+			</div>
+			<div className='row'>
+				<MovieList
+					movies={favourites}
+					handleFavouritesClick={removeFavouriteMovie}
+					favouriteComponent={RemoveFavourites}
+				/>
+			</div>
+		</div>
   );
 }
 
